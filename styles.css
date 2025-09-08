@@ -3,48 +3,38 @@ body {
   background: #f9fafb;
   color: #111827;
   padding: 20px;
-  margin: 0;
 }
-#app { max-width: 980px; margin: 26px auto; }
-h1 { font-size: 1.8em; margin-bottom: 6px; }
-p.lead { color:#6b7280; margin-top:0; }
-
-.choose-btn {
+h1 {
+  font-size: 1.8em;
+  margin-bottom: 10px;
+}
+.choose-btn, button {
   display: inline-block;
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
-  background: linear-gradient(90deg,#0ea5a8,#06b6d4);
+  background: #2563eb;
   color: white;
-  font-weight: 700;
+  font-weight: bold;
   border: none;
-  text-decoration: none;
+  margin-top: 10px;
 }
-.choose-btn:hover { filter: brightness(.92); }
-
+.choose-btn:hover, button:hover {
+  background: #1e40af;
+}
 .table-container {
-  margin-top: 18px;
-  max-height: 360px;
+  margin-top: 20px;
+  max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #e6eef0;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  background: #fff;
 }
-table { width:100%; border-collapse: collapse; }
-th, td { padding: 10px; border-bottom: 1px solid #f0f3f5; text-align: left; }
-thead th { background:#f8fafb; font-weight:700; }
-.controls { margin-top: 14px; display:flex; gap:12px; flex-wrap:wrap; }
-.controls label { display:block; font-size:13px; color:#111827; }
-select { padding:8px; border-radius:8px; border:1px solid #e6eef0; background:#fff; min-width:200px; }
-
-.actions { margin-top:12px; display:flex; gap:10px; align-items:center; }
-.btn { padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer; border:0; color:#fff; }
-.btn-extract { background: linear-gradient(90deg,#10b981,#059669); }
-.btn-download { background: linear-gradient(90deg,#7c3aed,#5b21b6); }
-.btn-reset { background: #fff; color:#111827; border:1px solid #e6eef0; }
-
-.stats { margin-top:12px; color:#6b7280; display:flex; gap:12px; flex-wrap:wrap;font-size:14px; }
-
-.note { margin-top:18px; color:#6b7280; font-size:13px; text-align:center; }
-.hidden { display:none; }
-@media (max-width:640px){ .controls { flex-direction:column } .choose-btn{width:100%; text-align:center} }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border-bottom: 1px solid #eee;
+  padding: 8px;
+  text-align: left;
+}
