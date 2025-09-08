@@ -1,40 +1,74 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f9fafb;
-  color: #111827;
+  background: #f8fafc;
+  margin: 0;
   padding: 20px;
+  color: #111827;
 }
-h1 {
-  font-size: 1.8em;
-  margin-bottom: 10px;
+
+#app {
+  max-width: 800px;
+  margin: auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
-.choose-btn, button {
-  display: inline-block;
-  padding: 10px 16px;
+
+header h1 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+header p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+input[type="file"] {
+  margin-bottom: 16px;
+}
+
+#controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+label {
+  font-size: 14px;
+  color: #374151;
+}
+
+select {
+  display: block;
+  margin-top: 4px;
+  padding: 6px;
   border-radius: 8px;
-  cursor: pointer;
+  border: 1px solid #d1d5db;
+}
+
+button {
   background: #2563eb;
   color: white;
-  font-weight: bold;
   border: none;
-  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
 }
-.choose-btn:hover, button:hover {
-  background: #1e40af;
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
-.table-container {
+
+#output {
   margin-top: 20px;
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  border-bottom: 1px solid #eee;
-  padding: 8px;
-  text-align: left;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 14px;
 }
