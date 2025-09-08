@@ -1,170 +1,178 @@
-// App JS - handles CSV parsing, filtering and download
-(function(){
-  const fileInput = document.getElementById('fileInput');
-  const chooseBtn = document.getElementById('chooseBtn');
-  const uploadArea = document.getElementById('uploadArea');
-  const websiteSelect = document.getElementById('websiteSelect');
-  const phoneSelect = document.getElementById('phoneSelect');
-  const controls = document.getElementById('controls');
-  const extractBtn = document.getElementById('extractBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const stats = document.getElementById('stats');
-  const results = document.getElementById('results');
-  const resultsTableBody = document.querySelector('#resultsTable tbody');
-  const totalRowsEl = document.getElementById('totalRows');
-  const noWebsiteRowsEl = document.getElementById('noWebsiteRows');
-  const phonesCountEl = document.getElementById('phonesCount');
+// app.js - copy exactly
+const app = document.getElementById('app');
+const fileInput = document.getElementById('fileInput');
 
-  let parsedRows = [];
-  let filteredPhones = [];
+app.innerHTML = `
+  <h1>No-Website Phone Extractor</h1>
+  <p class="lead">Upload a CSV exported from Google Maps (or similar). The tool extracts phone numbers for entries that don't have a website.</p>
 
-  chooseBtn.addEventListener('click', ()=> fileInput.click());
-  uploadArea.addEventListener('drop', handleDrop);
-  uploadArea.addEventListener('dragover', (e)=> e.preventDefault());
-  fileInput.addEventListener('change', (e)=> handleFile(e.target.files[0]));
+  <div style="margin-top:12px;">
+    <label for="fileInput" class="choose-btn">Choose CSV file</label>
+  </div>
 
-  resetBtn.addEventListener('click', resetAll);
+  <div id="output"></div>
+`;
 
-  function handleDrop(e){
-    e.preventDefault();
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f) handleFile(f);
-  }
+let rows = [];
+let headers = [];
+let websiteCol = '';
+let phoneCol = '';
+let filteredPhones = [];
 
-  function handleFile(file){
-    if(!file) return;
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (h)=> (h||'').trim(),
-      complete: function(res){
-        parsedRows = (res.data || []).filter(r => Object.keys(r).length > 0);
-        if(!parsedRows.length){
-          alert('No rows found in CSV');
-          return;
-        }
-        populateColumnSelectors(parsedRows);
-      },
-      error: function(err){
-        alert('CSV parse error: '+err.message);
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: h => (h||'').trim(),
+    complete: (res) => {
+      rows = (res.data || []).filter(r => Object.keys(r).length > 0);
+      if (!rows.length) {
+        alert('No rows found in CSV.');
+        return;
       }
-    });
+      headers = Object.keys(rows[0]);
+      renderSelectors();
+    },
+    error: (err) => alert('CSV parse error: ' + (err.message || err))
+  });
+});
+
+function renderSelectors() {
+  const out = document.getElementById('output');
+  const hdrOptions = headers.map(h => `<option value="${h}">${h}</option>`).join('');
+  out.innerHTML = `
+    <div class="controls">
+      <label>Website column
+        <select id="websiteSelect">
+          <option value="">(No column — treat all as no website)</option>
+          ${hdrOptions}
+        </select>
+      </label>
+
+      <label>Phone column *
+        <select id="phoneSelect">
+          <option value="">Select phone column</option>
+          ${hdrOptions}
+        </select>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button id="extractBtn" class="btn btn-extract">Extract Phones</button>
+      <button id="downloadBtn" class="btn btn-download" disabled>Download Phones CSV</button>
+      <button id="resetBtn" class="btn btn-reset">Reset</button>
+    </div>
+
+    <div id="stats" class="stats hidden">
+      <span>Total rows: <b id="totalRows">0</b></span>
+      <span>No-website rows: <b id="noWebsiteRows">0</b></span>
+      <span>Phones extracted: <b id="phonesCount">0</b></span>
+    </div>
+
+    <div id="results" class="results hidden">
+      <h2>Preview (first 200)</h2>
+      <div class="table-container">
+        <table id="resultsTable">
+          <thead><tr><th>#</th><th>Name</th><th>Phone</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('websiteSelect').addEventListener('change', (e)=> websiteCol = e.target.value);
+  document.getElementById('phoneSelect').addEventListener('change', (e)=> phoneCol = e.target.value);
+  document.getElementById('extractBtn').addEventListener('click', onExtract);
+  document.getElementById('downloadBtn').addEventListener('click', onDownload);
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+  // auto-guess columns
+  const lower = headers.map(h => h.toLowerCase());
+  const websiteGuessIdx = lower.findIndex(h => ['website','web site','site','url','homepage','home page'].some(k => h.includes(k)));
+  const phoneGuessIdx = lower.findIndex(h => ['phone','telephone','tel','mobile','cell','contact number'].some(k => h.includes(k)));
+  if (websiteGuessIdx >= 0) document.getElementById('websiteSelect').value = headers[websiteGuessIdx];
+  if (phoneGuessIdx >= 0) document.getElementById('phoneSelect').value = headers[phoneGuessIdx];
+}
+
+function onExtract() {
+  if (!phoneCol) {
+    alert('Please select a phone column first.');
+    return;
   }
+  const normalize = v => (typeof v === 'string' ? v.trim() : (v==null ? '' : String(v))).trim();
 
-  function populateColumnSelectors(rows){
-    const hdrs = Object.keys(rows[0]);
-    websiteSelect.innerHTML = '';
-    phoneSelect.innerHTML = '';
-    const optNone = document.createElement('option');
-    optNone.value = '';
-    optNone.textContent = '(No column — treat all as no website)';
-    websiteSelect.appendChild(optNone);
-
-    hdrs.forEach(h => {
-      const o1 = document.createElement('option');
-      o1.value = h; o1.textContent = h;
-      websiteSelect.appendChild(o1);
-      const o2 = document.createElement('option');
-      o2.value = h; o2.textContent = h;
-      phoneSelect.appendChild(o2);
-    });
-
-    // auto-guess common names
-    const lower = hdrs.map(h=>h.toLowerCase());
-    const websiteGuess = hdrs[lower.findIndex(h=>['website','web site','site','url','homepage','home page'].some(k=>h.includes(k)))];
-    const phoneGuess = hdrs[lower.findIndex(h=>['phone','telephone','tel','mobile','cell','contact number'].some(k=>h.includes(k)))];
-    if(websiteGuess) websiteSelect.value = websiteGuess;
-    if(phoneGuess) phoneSelect.value = phoneGuess;
-
-    controls.classList.remove('hidden');
-    stats.classList.add('hidden');
-    results.classList.add('hidden');
-    downloadBtn.disabled = true;
-  }
-
-  extractBtn.addEventListener('click', ()=> {
-    const websiteCol = websiteSelect.value;
-    const phoneCol = phoneSelect.value;
-    if(!phoneCol){
-      alert('Please select a phone column first.');
-      return;
-    }
-    // normalize function
-    const normalize = v => (typeof v === 'string' ? v.trim() : (v==null ? '' : String(v))).trim();
-    const noWebsiteRows = parsedRows.filter(r => {
-      if(!websiteCol) return true;
-      const w = normalize(r[websiteCol]);
-      // treat many representations as missing
-      if(!w) return true;
-      const wl = w.toLowerCase();
-      if(wl === 'not found' || wl === 'n/a' || wl==='none' || /^https?:\/\/(maps\\.google\\.com|www\\.googleadservices\\.com)/.test(wl) ) {
-        // googleadservices ad links often appear as adurl= , treat as having website? We consider them as website => exclude.
-      }
-      // If website field seems like a URL (contains . or http) we treat it as present
-      const looksLikeUrl = /https?:\\/\\//i.test(w) || /\\./.test(w);
-      return !looksLikeUrl;
-    });
-
-    // extract phones from noWebsiteRows
-    const phones = [];
-    const rowsPreview = [];
-    for(const r of noWebsiteRows){
-      const p = normalize(r[phoneCol]);
-      if(p && p.toLowerCase() !== 'n/a'){
-        if(!phones.includes(p)) phones.push(p);
-        rowsPreview.push({name: r[Object.keys(r)[0]] || '', phone: p}); // show first col as name if available
-      }
-    }
-
-    filteredPhones = phones;
-    // update stats and UI
-    totalRowsEl.textContent = parsedRows.length;
-    noWebsiteRowsEl.textContent = noWebsiteRows.length;
-    phonesCountEl.textContent = filteredPhones.length;
-    stats.classList.remove('hidden');
-
-    // fill table preview (unique, first 200)
-    resultsTableBody.innerHTML = '';
-    const preview = rowsPreview.slice(0,200);
-    preview.forEach((row,i)=>{
-      const tr = document.createElement('tr');
-      const tdIdx = document.createElement('td'); tdIdx.textContent = i+1;
-      const tdName = document.createElement('td'); tdName.textContent = row.name || '';
-      const tdPhone = document.createElement('td'); tdPhone.textContent = row.phone;
-      tr.appendChild(tdIdx); tr.appendChild(tdName); tr.appendChild(tdPhone);
-      resultsTableBody.appendChild(tr);
-    });
-    results.classList.remove('hidden');
-    downloadBtn.disabled = filteredPhones.length === 0;
+  const noWebsiteRows = rows.filter(r => {
+    if (!websiteCol) return true;
+    const w = normalize(r[websiteCol]);
+    // consider empty or clearly not a URL as missing
+    if (!w) return true;
+    const wl = w.toLowerCase();
+    // treat common placeholders as missing
+    if (wl === 'not found' || wl === 'n/a' || wl === 'none' || wl === '-') return true;
+    // if it contains http or a dot, consider it a website (present) => exclude
+    if (/https?:\\/\\//i.test(w) || /\\./.test(w)) return false;
+    return true;
   });
 
-  downloadBtn.addEventListener('click', ()=>{
-    if(!filteredPhones || !filteredPhones.length) return;
-    // build CSV with single column 'phone'
-    const lines = [['phone'], ...filteredPhones.map(p=>[p])];
-    const csv = Papa.unparse({fields: ['phone'], data: filteredPhones.map(p=>[p])});
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'phones_no_website.csv';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  });
-
-  function resetAll(){
-    parsedRows = [];
-    filteredPhones = [];
-    fileInput.value = '';
-    websiteSelect.innerHTML = '';
-    phoneSelect.innerHTML = '';
-    controls.classList.add('hidden');
-    stats.classList.add('hidden');
-    results.classList.add('hidden');
-    downloadBtn.disabled = true;
+  // extract unique phones
+  const phones = [];
+  const previewRows = [];
+  for (const r of noWebsiteRows) {
+    const p = normalize(r[phoneCol]);
+    if (p && !phones.includes(p)) {
+      phones.push(p);
+      // choose a name column to show (prefer 'name' or first column)
+      const nameKey = Object.keys(r).find(k => /name/i.test(k)) || Object.keys(r)[0];
+      previewRows.push({ name: r[nameKey] || '', phone: p });
+    }
   }
 
-})();
+  filteredPhones = phones;
+  // update UI
+  document.getElementById('totalRows').textContent = rows.length;
+  document.getElementById('noWebsiteRows').textContent = noWebsiteRows.length;
+  document.getElementById('phonesCount').textContent = filteredPhones.length;
+  document.getElementById('stats').classList.remove('hidden');
+
+  // fill preview table
+  const tbody = document.querySelector('#resultsTable tbody');
+  tbody.innerHTML = '';
+  previewRows.slice(0,200).forEach((r,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(String(r.name||''))}</td><td>${escapeHtml(String(r.phone||''))}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('downloadBtn').disabled = filteredPhones.length === 0;
+}
+
+function onDownload() {
+  if (!filteredPhones || !filteredPhones.length) return;
+  const csv = Papa.unparse({ fields: ['phone'], data: filteredPhones.map(p => [p]) });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'phones_no_website.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function resetAll() {
+  rows = []; headers = []; websiteCol = ''; phoneCol = ''; filteredPhones = [];
+  document.getElementById('output').innerHTML = '';
+  document.getElementById('app').querySelector('.choose-btn').scrollIntoView({behavior:'smooth'});
+  // re-create the choose button? it's still present as label for fileInput
+  // clear file input
+  try { document.getElementById('fileInput').value = ''; } catch(e) {}
+  document.getElementById('stats')?.classList.add('hidden');
+  document.getElementById('results')?.classList.add('hidden');
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',\"'\":\"&#39;\"})[m]; });
+}
