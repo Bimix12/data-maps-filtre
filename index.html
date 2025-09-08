@@ -1,22 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>No-Website Phone Extractor</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>No-Website Phone Extractor</h1>
-  <p>Upload a CSV, select Website & Phone columns, then download phone numbers without websites.</p>
+  <div class="container">
+    <header>
+      <h1>No-Website Phone Extractor</h1>
+      <p>Upload a CSV, select Website & Phone columns, and download only phone numbers where no website exists.</p>
+    </header>
 
-  <label for="csvInput" class="choose-btn">Choose CSV file</label>
-  <input type="file" id="csvInput" accept=".csv" hidden />
+    <div id="upload-section">
+      <label class="file-label" for="csvInput">Choose CSV file</label>
+      <input type="file" id="csvInput" accept=".csv">
+      <div id="drop-area">Or drag & drop your CSV here</div>
+      <div id="error" class="error"></div>
+    </div>
 
-  <div id="controls"></div>
-  <div id="output"></div>
+    <div id="columns-section" class="hidden">
+      <label for="websiteCol">Website column:</label>
+      <select id="websiteCol"></select>
 
-  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="app.js"></script>
+      <label for="phoneCol">Phone column:</label>
+      <select id="phoneCol"></select>
+
+      <button id="downloadBtn" class="btn">Download Phones</button>
+    </div>
+
+    <div id="phones-section" class="hidden">
+      <h3>Phones without website:</h3>
+      <ol id="phonesList"></ol>
+    </div>
+
+    <footer>
+      <p>All processing happens in your browser. Nothing is uploaded to any server.</p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
