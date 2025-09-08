@@ -1,108 +1,55 @@
-let rows = [];
-let headers = [];
-let websiteCol = "";
-let phoneCol = [];
-let phonesFiltered = [];
+const fileInput = document.getElementById('csvInput');
+const controls = document.getElementById('controls');
+const output = document.getElementById('output');
 
-const fileInput = document.getElementById("csvInput");
-const websiteSelect = document.getElementById("websiteCol");
-const phoneSelect = document.getElementById("phoneCol");
-const downloadBtn = document.getElementById("downloadBtn");
-const outputDiv = document.getElementById("output");
+let rows = [], headers = [], websiteCol = '', phoneCol = '';
 
-// Parse CSV
-fileInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    complete: (res) => {
+fileInput.addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  Papa.parse(f, {
+    header:true, skipEmptyLines:true,
+    complete: res => {
       rows = res.data;
-      headers = Object.keys(rows[0] || {});
-      fillSelects();
-    },
-    error: (err) => {
-      alert("Error parsing CSV: " + err.message);
-    },
+      headers = Object.keys(rows[0]||{});
+      renderSelectors();
+    }
   });
 });
 
-function fillSelects() {
-  websiteSelect.innerHTML = `<option value="">(No column — treat all as no website)</option>`;
-  phoneSelect.innerHTML = `<option value="">Select phone column</option>`;
-
-  headers.forEach((h) => {
-    const opt1 = document.createElement("option");
-    opt1.value = h;
-    opt1.textContent = h;
-    websiteSelect.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = h;
-    opt2.textContent = h;
-    phoneSelect.appendChild(opt2);
-  });
+function renderSelectors(){
+  controls.innerHTML = `
+    <select id="selWeb"><option value="">No website col</option>${headers.map(h => `<option>${h}</option>`)}</select>
+    <select id="selPhone"><option value="">Select phone col</option>${headers.map(h => `<option>${h}</option>`)}</select>
+    <button id="btn">Extract</button>
+  `;
+  document.getElementById('btn').addEventListener('click', extractPhones);
 }
 
-websiteSelect.addEventListener("change", (e) => {
-  websiteCol = e.target.value;
-  filterPhones();
-});
-
-phoneSelect.addEventListener("change", (e) => {
-  phoneCol = e.target.value;
-  filterPhones();
-});
-
-function filterPhones() {
-  if (!phoneCol) {
-    downloadBtn.disabled = true;
-    return;
-  }
-
-  const normalize = (v) => (typeof v === "string" ? v.trim() : v ?? "");
-
-  const noWebsiteRows = rows.filter((r) => {
+function extractPhones(){
+  websiteCol = document.getElementById('selWeb').value;
+  phoneCol = document.getElementById('selPhone').value;
+  if (!phoneCol) return alert('Select phone col!');
+  const normalize = v => typeof v==='string'?v.trim():(v??'');
+  const arr = rows.filter(r => {
     if (!websiteCol) return true;
     const w = normalize(r[websiteCol]);
-    return !w || w.toLowerCase() === "not found" || /^\s*(n\/a|none|not\s*available|-)?\s*$/i.test(w);
-  });
-
-  phonesFiltered = noWebsiteRows
-    .map((r) => normalize(r[phoneCol]))
-    .filter((p) => p && p.toLowerCase() !== "n/a");
-
-  phonesFiltered = [...new Set(phonesFiltered)];
-
-  renderPhones();
-  downloadBtn.disabled = phonesFiltered.length === 0;
+    return !w || w.toLowerCase()==='n/a';
+  }).map(r => normalize(r[phoneCol])).filter(p=>p);
+  const phones = [...new Set(arr)];
+  renderPhones(phones);
 }
 
-function renderPhones() {
-  outputDiv.innerHTML = "";
-  if (!phonesFiltered.length) return;
-
-  const list = document.createElement("ol");
-  phonesFiltered.slice(0, 200).forEach((p) => {
-    const li = document.createElement("li");
-    li.textContent = p;
-    list.appendChild(li);
+function renderPhones(phones){
+  output.innerHTML = phones.length
+    ? `<div>Found: ${phones.length}</div><div class="table-container"><table><thead><tr><th>#</th><th>Phone</th></tr></thead><tbody>${phones.map((p,i)=>`<tr><td>${i+1}</td><td>${p}</td></tr>`).join('')}</tbody></table><button id="dl">Download CSV</button></div>`
+    : '<p>No phones found</p>';
+  const dl = document.getElementById('dl');
+  if(dl) dl.addEventListener('click', () => {
+    const csv = Papa.unparse({fields:['phone'], data:phones.map(p=>[p])});
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'phones.csv'; a.click();
   });
-  outputDiv.appendChild(list);
 }
-
-// Download CSV
-downloadBtn.addEventListener("click", () => {
-  if (!phonesFiltered.length) return;
-
-  const csv = Papa.unparse({ fields: ["phone"], data: phonesFiltered.map((p) => [p]) });
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "no-website-phones.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-});
