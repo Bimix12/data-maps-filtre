@@ -1,43 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>No-Website Phone Extractor</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div id="app">
-      <header>
-        <h1>No-Website Phone Extractor</h1>
-        <p>Upload a CSV, select Website & Phone columns, and download only phone numbers where no website exists.</p>
-      </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>No-Website Phone Extractor</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>No-Website Phone Extractor</h1>
+  <p>Upload a CSV, select Website & Phone columns, then download phone numbers without websites.</p>
 
-      <main>
-        <input type="file" id="csvInput" accept=".csv" />
-        <div id="controls">
-          <label>
-            Website column:
-            <select id="websiteCol"></select>
-          </label>
-          <label>
-            Phone column:
-            <select id="phoneCol"></select>
-          </label>
-        </div>
+  <label for="csvInput" class="choose-btn">Choose CSV file</label>
+  <input type="file" id="csvInput" accept=".csv" hidden />
 
-        <button id="downloadBtn" disabled>Download CSV</button>
-        <div id="output"></div>
-      </main>
+  <div id="controls"></div>
+  <div id="output"></div>
 
-      <footer>
-        <small>All processing happens in your browser. Nothing is uploaded to any server.</small>
-      </footer>
-    </div>
-
-    <!-- PapaParse -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- App logic -->
-    <script src="app.js"></script>
-  </body>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
