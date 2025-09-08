@@ -1,62 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>No‑Website Phone Extractor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>No-Website Phone Extractor</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>No‑Website Phone Extractor</h1>
-      <p class="lead">Upload a CSV exported from Google Maps (or similar). The tool extracts phone numbers for entries that don't have a website.</p>
-    </header>
-
-    <main class="card">
-      <div class="upload-area" id="uploadArea">
-        <input id="fileInput" type="file" accept=".csv" />
-        <button id="chooseBtn" class="btn btn-primary">Choose CSV file</button>
-        <div class="drop-hint">or drag & drop CSV here</div>
-      </div>
-
-      <div id="controls" class="controls hidden">
-        <div class="row">
-          <label>Website column</label>
-          <select id="websiteSelect"></select>
-        </div>
-        <div class="row">
-          <label>Phone column <span class="muted">(*)</span></label>
-          <select id="phoneSelect"></select>
-        </div>
-        <div class="row">
-          <button id="extractBtn" class="btn btn-success">Extract Phones</button>
-          <button id="downloadBtn" class="btn btn-download" disabled>Download Phones CSV</button>
-          <button id="resetBtn" class="btn btn-ghost">Reset</button>
-        </div>
-      </div>
-
-      <div id="stats" class="stats hidden">
-        <span>Total rows: <b id="totalRows">0</b></span>
-        <span>No-website rows: <b id="noWebsiteRows">0</b></span>
-        <span>Phones extracted: <b id="phonesCount">0</b></span>
-      </div>
-
-      <div id="results" class="results hidden">
-        <h2>Preview (first 200)</h2>
-        <table id="resultsTable">
-          <thead><tr><th>#</th><th>Name</th><th>Phone</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <footer class="note">
-        <small>All processing happens in your browser. Nothing is uploaded to any server.</small>
-      </footer>
-    </main>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <div id="app"></div>
+  <!-- hidden file input used by the Choose button -->
+  <input type="file" id="fileInput" accept=".csv" hidden />
+  <!-- PapaParse CDN -->
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
