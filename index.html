@@ -7,10 +7,16 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="app"></div>
-  <!-- hidden file input used by the Choose button -->
+  <h1>No-Website Phone Extractor</h1>
+  <p>Upload a CSV, select Website & Phone columns, and download only phone numbers where no website exists.</p>
+
+  <!-- زر يفتح نافذة اختيار الملف -->
+  <label for="fileInput" class="choose-btn">Choose CSV file</label>
   <input type="file" id="fileInput" accept=".csv" hidden />
-  <!-- PapaParse CDN -->
+
+  <div id="output"></div>
+
+  <!-- مكتبة PapaParse -->
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="app.js"></script>
 </body>
