@@ -1,34 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>No-Website Phone Extractor</title>
-
-  <!-- ✅ CSS file -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Tailwind CDN (باش يبان ستايل ملون ومنسق) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 text-gray-900 p-6">
-
-  <div class="max-w-4xl mx-auto">
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold">No-Website Phone Extractor</h1>
-      <p class="text-sm text-gray-600 mt-2">
-        Upload a CSV, select the Website and Phone columns, and get phone numbers of businesses without a website.
-      </p>
-    </header>
-
-    <div id="app"></div>
-
-    <footer class="text-xs text-gray-500 mt-8">
-      <p>All processing happens in your browser. Nothing is uploaded to any server.</p>
-    </footer>
-  </div>
-
-  <!-- ✅ JS file -->
-  <script src="script.js"></script>
+<body>
+ <div class="container">
+   <h1>No-Website Phone Extractor</h1>
+   <p>Upload a CSV, select Website & Phone columns, get phones without a website.</p>
+   <label class="btn" for="csvInput">Choose CSV file</label>
+   <input type="file" id="csvInput" accept=".csv" hidden>
+   <div id="columns"></div>
+   <ol id="results"></ol>
+   <button id="download" hidden>Download CSV</button>
+   <footer>All processing happens in your browser. Nothing is uploaded.</footer>
+ </div>
+ <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+ <script src="script.js"></script>
 </body>
 </html>
