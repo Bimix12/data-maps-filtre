@@ -1,83 +1,112 @@
-const csvInput = document.getElementById("csvInput");
-const dropArea = document.getElementById("drop-area");
-const errorDiv = document.getElementById("error");
+const fileInput = document.getElementById("csvInput");
+const statusEl = document.getElementById("status");
 const websiteColSelect = document.getElementById("websiteCol");
 const phoneColSelect = document.getElementById("phoneCol");
-const columnsSection = document.getElementById("columns-section");
+const controls = document.getElementById("controls");
+const results = document.getElementById("results");
+const phoneList = document.getElementById("phoneList");
 const downloadBtn = document.getElementById("downloadBtn");
-const phonesSection = document.getElementById("phones-section");
-const phonesList = document.getElementById("phonesList");
 
+let headers = [];
 let rows = [];
+let fileName = "";
 
-function reset() {
-  rows = [];
-  columnsSection.classList.add("hidden");
-  phonesSection.classList.add("hidden");
-  websiteColSelect.innerHTML = "";
-  phoneColSelect.innerHTML = "";
-  errorDiv.textContent = "";
-}
-
-function handleFile(file) {
-  reset();
+fileInput.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
   if (!file) return;
+
+  statusEl.textContent = "Parsing CSV...";
+  statusEl.className = "";
+
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
-    complete: function(results) {
-      rows = results.data;
-      if (!rows.length) {
-        errorDiv.textContent = "No rows found in CSV.";
-        return;
+    transformHeader: (h) => h.trim(),
+    complete: (res) => {
+      try {
+        rows = (res.data || []).filter((r) => Object.keys(r).length > 0);
+        if (!rows.length) {
+          statusEl.textContent = "No rows found in the CSV.";
+          statusEl.className = "error";
+          return;
+        }
+
+        headers = Object.keys(rows[0]);
+        websiteColSelect.innerHTML = `<option value="">(No column — treat all as no website)</option>`;
+        phoneColSelect.innerHTML = `<option value="">Select phone column</option>`;
+        headers.forEach((h) => {
+          websiteColSelect.innerHTML += `<option value="${h}">${h}</option>`;
+          phoneColSelect.innerHTML += `<option value="${h}">${h}</option>`;
+        });
+
+        fileName = file.name;
+        statusEl.textContent = `File loaded: ${file.name}`;
+        statusEl.className = "success";
+        controls.classList.remove("hidden");
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = "Failed to parse CSV.";
+        statusEl.className = "error";
       }
-      const headers = Object.keys(rows[0]);
-      headers.forEach(h => {
-        websiteColSelect.innerHTML += `<option value="${h}">${h}</option>`;
-        phoneColSelect.innerHTML += `<option value="${h}">${h}</option>`;
-      });
-      columnsSection.classList.remove("hidden");
     },
-    error: function() {
-      errorDiv.textContent = "Error parsing CSV.";
-    }
+    error: (err) => {
+      console.error(err);
+      statusEl.textContent = "CSV parsing error.";
+      statusEl.className = "error";
+    },
   });
-}
-
-csvInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
-
-dropArea.addEventListener("dragover", (e) => {
-  e.preventDefault();
-});
-
-dropArea.addEventListener("drop", (e) => {
-  e.preventDefault();
-  handleFile(e.dataTransfer.files[0]);
 });
 
 downloadBtn.addEventListener("click", () => {
   const websiteCol = websiteColSelect.value;
   const phoneCol = phoneColSelect.value;
-  if (!phoneCol) return alert("Select phone column!");
+  if (!phoneCol) {
+    alert("Please select a phone column!");
+    return;
+  }
 
-  const phones = Array.from(new Set(
-    rows.filter(r => {
-      const w = r[websiteCol] ? r[websiteCol].trim() : "";
-      return !w || w.toLowerCase() === "not found" || /^\s*(n\/a|none|not\s*available|-)?\s*$/i.test(w);
-    }).map(r => r[phoneCol] ? r[phoneCol].trim() : "").filter(p => p)
-  ));
+  const normalize = (v) => (typeof v === "string" ? v.trim() : v ?? "");
+  const noWebsiteRows = rows.filter((r) => {
+    if (!websiteCol) return true;
+    const w = normalize(r[websiteCol]);
+    return (
+      !w ||
+      w.toLowerCase() === "not found" ||
+      /^\s*(n\/a|none|not\s*available|-)?\s*$/i.test(w)
+    );
+  });
 
-  phonesList.innerHTML = phones.map(p => `<li>${p}</li>`).join("");
-  phonesSection.classList.remove("hidden");
+  const phones = noWebsiteRows
+    .map((r) => normalize(r[phoneCol]))
+    .filter((p) => p && p.toLowerCase() !== "n/a");
 
-  // download CSV
-  const csv = Papa.unparse({fields: ["phone"], data: phones.map(p => [p])});
-  const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+  const uniquePhones = Array.from(new Set(phones));
+
+  if (!uniquePhones.length) {
+    alert("No phone numbers found without websites.");
+    return;
+  }
+
+  // Show in UI
+  phoneList.innerHTML = uniquePhones
+    .slice(0, 200)
+    .map((p) => `<li>${p}</li>`)
+    .join("");
+  results.classList.remove("hidden");
+
+  // Download CSV
+  const csv = Papa.unparse({
+    fields: ["phone"],
+    data: uniquePhones.map((p) => [p]),
+  });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "phones_no_website.csv";
+  const base = fileName ? fileName.replace(/\.csv$/i, "") : "phones";
+  a.download = `${base}_no-website_phones.csv`;
   document.body.appendChild(a);
   a.click();
+  URL.revokeObjectURL(url);
   a.remove();
 });
