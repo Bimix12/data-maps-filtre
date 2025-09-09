@@ -1,50 +1,69 @@
-const input = document.getElementById("csvInput");
-const columns = document.getElementById("columns");
+const fileInput = document.getElementById("csvInput");
+const statusEl = document.getElementById("status");
+const websiteColSelect = document.getElementById("websiteCol");
+const phoneColSelect = document.getElementById("phoneCol");
+const controls = document.getElementById("controls");
 const results = document.getElementById("results");
-const downloadButton = document.getElementById("download");
+const phoneList = document.getElementById("phoneList");
+const downloadBtn = document.getElementById("downloadBtn");
 
-let data = [], uniquePhones = [];
+let rows = [];
+let fileName = "";
 
-input.addEventListener("change", (e) => {
-  Papa.parse(e.target.files[0], { header:true, skipEmptyLines:true,
+fileInput.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  statusEl.textContent = "Parsing CSV...";
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
     complete: (res) => {
-      data = res.data;
-      const headers = Object.keys(data[0] || {});
-      if (!headers.length) return alert("CSV is empty");
-      columns.innerHTML = `
-        <select id="webCol"><option value="">No website column</option>${headers.map(h=>`<option>${h}</option>`)}</select>
-        <select id="phCol"><option value="">Phone column</option>${headers.map(h=>`<option>${h}</option>`)}</select>
-      `;
-      document.getElementById("phCol").addEventListener("change", filter);
+      rows = res.data;
+      if (!rows.length) {
+        statusEl.textContent = "No rows found in the CSV.";
+        return;
+      }
+      const headers = Object.keys(rows[0]);
+      websiteColSelect.innerHTML = `<option value="">(No column — treat all as no website)</option>`;
+      phoneColSelect.innerHTML = `<option value="">Select phone column</option>`;
+      headers.forEach((h) => {
+        websiteColSelect.innerHTML += `<option value="${h}">${h}</option>`;
+        phoneColSelect.innerHTML += `<option value="${h}">${h}</option>`;
+      });
+      statusEl.textContent = `File loaded: ${file.name}`;
+      fileName = file.name;
+      controls.classList.remove("hidden");
     }
   });
 });
 
-function filter(){
-  const web = document.getElementById("webCol").value;
-  const phone = document.getElementById("phCol").value;
-  if (!phone) return;
-  uniquePhones = Array.from(new Set(data
-    .filter(r => !web || !r[web])
-    .map(r => r[phone]).filter(Boolean)
+downloadBtn.addEventListener("click", () => {
+  const websiteCol = websiteColSelect.value;
+  const phoneCol = phoneColSelect.value;
+  if (!phoneCol) return alert("Please select a phone column!");
+  const phones = Array.from(new Set(
+    rows
+      .filter((r) => {
+        const w = (r[websiteCol] || "").trim().toLowerCase();
+        return !w || w === "not found" || /^(n\/a|none|not available|-)?$/i.test(w);
+      })
+      .map((r) => (r[phoneCol] || "").trim())
+      .filter((p) => p)
   ));
-  results.innerHTML = uniquePhones.map(p => `<li>${p}</li>`).join("");
-  if (uniquePhones.length) downloadButton.hidden = false;
-}
+  results.classList.remove("hidden");
+  phoneList.innerHTML = phones.map((p) => `<li>${p}</li>`).join("");
 
-downloadButton.addEventListener("click", () => {
-  const csv = Papa.unparse({ fields:["phone"], data: uniquePhones.map(p=>[p]) });
-  const blob = new Blob([csv], { type: "text/csv" });
+  const csv = Papa.unparse({
+    fields: ["phone"],
+    data: phones.map((p) => [p])
+  });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "phones.csv";
+  a.href = url;
+  const base = fileName ? fileName.replace(/\.csv$/i, "") : "phones";
+  a.download = `${base}_no-website_phones.csv`;
+  document.body.appendChild(a);
   a.click();
-});
-
-// drag & drop
-document.querySelector(".container").addEventListener("dragover", e=>e.preventDefault());
-document.querySelector(".container").addEventListener("drop", e=>{
-  e.preventDefault();
-  input.files = e.dataTransfer.files;
-  input.dispatchEvent(new Event("change"));
+  a.remove();
 });
