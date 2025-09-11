@@ -1,4 +1,4 @@
-/* Optional custom tweaks */
+/* Scrollbar style */
 body::-webkit-scrollbar {
   width: 8px;
 }
@@ -10,4 +10,22 @@ body::-webkit-scrollbar-thumb {
 
 body::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode overrides */
+body.dark {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+body.dark .bg-white {
+  background-color: #374151 !important;
+}
+
+body.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+body.dark .border-gray-400 {
+  border-color: #6b7280 !important;
 }
