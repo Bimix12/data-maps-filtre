@@ -2,12 +2,10 @@
 body::-webkit-scrollbar {
   width: 8px;
 }
-
 body::-webkit-scrollbar-thumb {
   background-color: rgba(107, 114, 128, 0.5);
   border-radius: 4px;
 }
-
 body::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -17,15 +15,28 @@ body.dark {
   background-color: #1f2937;
   color: #f3f4f6;
 }
-
 body.dark .bg-white {
   background-color: #374151 !important;
 }
-
 body.dark .text-gray-600 {
   color: #d1d5db !important;
 }
-
 body.dark .border-gray-400 {
   border-color: #6b7280 !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Drag highlight */
+#dropArea.dragover {
+  border-color: #2563eb;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
 }
