@@ -1,52 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>No-Website Phone Extractor</title>
-  <link rel="stylesheet" href="./style.css" />
-  <!-- PapaParse for CSV parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>No-Website Phone Extractor</h1>
-      <p>Upload a CSV, select Website & Phone columns, and download only phone numbers where no website exists.</p>
+      <h1>No‑Website Phone Extractor</h1>
+      <p>Upload a CSV, select the Website and Phone columns, and get phone numbers of businesses without a website.</p>
     </header>
 
-    <main>
-      <div class="upload-box">
-        <label for="csvInput" class="btn">Choose CSV file</label>
-        <input id="csvInput" type="file" accept=".csv" hidden />
-        <p id="status" class="status"></p>
+    <div id="uploadSection" class="upload-section">
+      <label for="csvInput" class="upload-btn">Select CSV file</label>
+      <input id="csvInput" type="file" accept=".csv">
+      <div id="dropArea" class="drop-area">Drag & drop your CSV here</div>
+      <div id="loading" class="loading"></div>
+      <div id="error" class="error"></div>
+    </div>
+
+    <div id="dataSection" class="data-section hidden">
+      <div class="file-info">
+        <span id="fileName"></span>
+        <button id="resetBtn">Reset</button>
       </div>
 
-      <div id="controls" class="hidden">
-        <div class="selects">
-          <div>
-            <label>Website column</label>
-            <select id="websiteCol"></select>
-          </div>
-          <div>
-            <label>Phone column *</label>
-            <select id="phoneCol"></select>
-          </div>
+      <div class="selectors">
+        <div>
+          <label>Website column</label>
+          <select id="websiteCol">
+            <option value="">(No column — treat all as no website)</option>
+          </select>
         </div>
-        <button id="downloadBtn" class="btn primary">Download CSV</button>
+        <div>
+          <label>Phone column *</label>
+          <select id="phoneCol">
+            <option value="">Select phone column</option>
+          </select>
+        </div>
       </div>
 
-      <div id="results" class="hidden">
-        <h2>Extracted Phones</h2>
-        <ol id="phoneList"></ol>
+      <div id="results" class="results hidden">
+        <div class="results-header">
+          <span>Unique phone numbers of entries without a website ready to download.</span>
+          <button id="downloadBtn">Download CSV</button>
+        </div>
+        <ol id="phoneList" class="phone-list"></ol>
       </div>
-    </main>
+    </div>
 
     <footer>
       <p>All processing happens in your browser. Nothing is uploaded to any server.</p>
     </footer>
   </div>
 
-  <script src="./script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
