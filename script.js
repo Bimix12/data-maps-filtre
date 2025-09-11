@@ -11,6 +11,7 @@ const phoneColEl = document.getElementById("phoneCol");
 const resultsEl = document.getElementById("results");
 const phoneListEl = document.getElementById("phoneList");
 const downloadBtn = document.getElementById("downloadBtn");
+const copyBtn = document.getElementById("copyBtn");
 
 let headers = [];
 let rows = [];
@@ -108,6 +109,17 @@ function updatePhones() {
     a.click();
     URL.revokeObjectURL(url);
     a.remove();
+  };
+
+  copyBtn.onclick = () => {
+    const phones = filteredPhones.join("\n");
+    if (!phones) return;
+    navigator.clipboard.writeText(phones)
+      .then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy Results", 1500);
+      })
+      .catch(err => console.error("Failed to copy", err));
   };
 }
 
