@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>No-Website Phone Extractor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -14,7 +14,7 @@
       <div class="flex justify-end mb-2">
         <button id="darkModeBtn" class="px-4 py-2 rounded-2xl bg-gray-200 hover:bg-gray-300 transition">🌙 Dark Mode</button>
       </div>
-      <h1 class="text-4xl font-bold mb-2">No‑Website Phone Extractor</h1>
+      <h1 class="text-4xl font-bold mb-2">No-Website Phone Extractor</h1>
       <p class="text-gray-600">Upload a CSV, select the Website and Phone columns, and get phone numbers of businesses without a website.</p>
     </header>
 
@@ -22,7 +22,7 @@
     <div id="uploadSection" class="w-full max-w-4xl bg-white rounded-2xl shadow p-6 mb-6 transition-all duration-300 hover:shadow-lg">
       <label for="csvInput" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl shadow border bg-gray-100 hover:bg-gray-200 cursor-pointer font-medium transition">Select CSV file</label>
       <input id="csvInput" type="file" accept=".csv" class="hidden">
-      <div id="dropArea" class="mt-4 border-2 border-dashed rounded-2xl p-12 text-center text-gray-500 hover:border-gray-400 transition">Drag & drop your CSV here</div>
+      <div id="dropArea" class="mt-4 border-2 border-dashed rounded-2xl p-12 text-center text-gray-500 transition">Drag & drop your CSV here</div>
       <div id="loading" class="mt-4 text-gray-600"></div>
       <div id="error" class="mt-4 text-red-600"></div>
     </div>
@@ -45,12 +45,12 @@
         </div>
       </div>
 
-      <div id="results" class="hidden">
+      <div id="results" class="hidden animate-fadeIn">
         <div class="flex justify-between items-center mb-3 space-x-2">
           <span class="text-sm text-gray-600">Unique phone numbers of entries without a website ready to download.</span>
           <div class="flex space-x-2">
-            <button id="copyBtn" class="px-4 py-2 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition">Copy Results</button>
-            <button id="downloadBtn" class="px-4 py-2 rounded-2xl bg-black text-white hover:bg-gray-900 transition">Download CSV</button>
+            <button id="copyBtn" class="px-4 py-2 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition">Copy Results</button>
+            <button id="downloadBtn" class="px-4 py-2 rounded-2xl bg-black text-white hover:bg-gray-900 active:scale-95 transition">Download CSV</button>
           </div>
         </div>
         <div class="border rounded-2xl p-4 max-h-72 overflow-auto transition-all duration-300">
