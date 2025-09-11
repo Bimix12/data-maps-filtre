@@ -16,7 +16,6 @@ let headers = [];
 let rows = [];
 let fileName = "";
 
-// Reset
 resetBtn.addEventListener("click", () => {
   headers = [];
   rows = [];
@@ -30,7 +29,6 @@ resetBtn.addEventListener("click", () => {
   errorEl.textContent = '';
 });
 
-// Handle CSV
 function handleCsv(file) {
   if (!file) return;
   loadingEl.textContent = "Parsing CSV…";
@@ -51,7 +49,6 @@ function handleCsv(file) {
       fileName = file.name;
       fileNameEl.textContent = fileName;
 
-      // Populate selects
       websiteColEl.innerHTML = '<option value="">(No column — treat all as no website)</option>' +
         headers.map(h => `<option value="${h}">${h}</option>`).join('');
       phoneColEl.innerHTML = '<option value="">Select phone column</option>' +
@@ -69,17 +66,13 @@ function handleCsv(file) {
   });
 }
 
-// File input
 csvInput.addEventListener("change", e => handleCsv(e.target.files[0]));
-
-// Drag & drop
 dropArea.addEventListener("dragover", e => e.preventDefault());
 dropArea.addEventListener("drop", e => {
   e.preventDefault();
   handleCsv(e.dataTransfer.files[0]);
 });
 
-// Filter and display phones
 function updatePhones() {
   const websiteCol = websiteColEl.value;
   const phoneCol = phoneColEl.value;
@@ -101,8 +94,7 @@ function updatePhones() {
 
   phoneListEl.innerHTML = filteredPhones.slice(0,200).map(p => `<li>${p}</li>`).join('');
   resultsEl.classList.toggle("hidden", filteredPhones.length === 0);
-  
-  // Prepare download
+
   downloadBtn.onclick = () => {
     if (!filteredPhones.length) return;
     const csv = Papa.unparse({ fields: ["phone"], data: filteredPhones.map(p => [p]) });
