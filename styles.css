@@ -1,93 +1,84 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f9fafb;
-  color: #333;
+  background: #f8f9fa;
   margin: 0;
   padding: 0;
+  color: #333;
 }
 
 .container {
   max-width: 800px;
-  margin: auto;
+  margin: 30px auto;
   padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-header {
+header h1 {
   text-align: center;
-  margin-bottom: 30px;
+  color: #007bff;
 }
 
-h1 {
-  font-size: 28px;
-  margin-bottom: 10px;
+header p {
+  text-align: center;
+  color: #555;
 }
 
 .upload-box {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   text-align: center;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 .btn {
   display: inline-block;
-  background: #6b7280;
-  color: white;
   padding: 10px 20px;
-  border-radius: 8px;
+  margin: 5px;
+  border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
-  margin: 5px 0;
+  font-weight: bold;
+  border: none;
 }
 
 .btn:hover {
-  background: #4b5563;
+  opacity: 0.9;
 }
 
 .btn.primary {
-  background: #2563eb;
-}
-
-.btn.primary:hover {
-  background: #1d4ed8;
+  background: #007bff;
+  color: #fff;
 }
 
 .status {
   margin-top: 10px;
-  font-size: 14px;
   color: #555;
+}
+
+.hidden {
+  display: none;
 }
 
 .selects {
   display: flex;
-  gap: 20px;
+  justify-content: space-around;
   margin: 20px 0;
 }
 
 select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
+  padding: 6px;
+  border-radius: 4px;
   border: 1px solid #ccc;
 }
 
 #results {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-top: 30px;
+}
+
+#results h2 {
+  color: #28a745;
 }
 
 #phoneList {
-  margin: 0;
   padding-left: 20px;
-}
-
-footer {
-  text-align: center;
-  font-size: 12px;
-  color: #777;
-  margin-top: 30px;
 }
