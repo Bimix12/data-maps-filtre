@@ -12,10 +12,17 @@ const resultsEl = document.getElementById("results");
 const phoneListEl = document.getElementById("phoneList");
 const downloadBtn = document.getElementById("downloadBtn");
 const copyBtn = document.getElementById("copyBtn");
+const darkModeBtn = document.getElementById("darkModeBtn");
 
 let headers = [];
 let rows = [];
 let fileName = "";
+
+// Dark mode toggle
+darkModeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  darkModeBtn.textContent = document.body.classList.contains("dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
+});
 
 resetBtn.addEventListener("click", () => {
   headers = [];
