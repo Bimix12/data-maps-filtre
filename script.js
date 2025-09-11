@@ -24,6 +24,7 @@ darkModeBtn.addEventListener("click", () => {
   darkModeBtn.textContent = document.body.classList.contains("dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
 });
 
+// Reset
 resetBtn.addEventListener("click", () => {
   headers = [];
   rows = [];
@@ -37,11 +38,12 @@ resetBtn.addEventListener("click", () => {
   errorEl.textContent = '';
 });
 
+// Parse CSV
 function handleCsv(file) {
   if (!file) return;
   loadingEl.textContent = "Parsing CSV…";
   errorEl.textContent = "";
-  
+
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
@@ -75,12 +77,20 @@ function handleCsv(file) {
 }
 
 csvInput.addEventListener("change", e => handleCsv(e.target.files[0]));
-dropArea.addEventListener("dragover", e => e.preventDefault());
+
+// Drag & drop events
+dropArea.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropArea.classList.add("dragover");
+});
+dropArea.addEventListener("dragleave", () => dropArea.classList.remove("dragover"));
 dropArea.addEventListener("drop", e => {
   e.preventDefault();
+  dropArea.classList.remove("dragover");
   handleCsv(e.dataTransfer.files[0]);
 });
 
+// Update phones
 function updatePhones() {
   const websiteCol = websiteColEl.value;
   const phoneCol = phoneColEl.value;
@@ -91,7 +101,6 @@ function updatePhones() {
   }
 
   const normalize = v => (typeof v === "string" ? v.trim() : v ?? "");
-
   const filteredPhones = Array.from(new Set(
     rows.filter(r => {
       if (!websiteCol) return true;
@@ -100,9 +109,10 @@ function updatePhones() {
     }).map(r => normalize(r[phoneCol])).filter(p => p && p.toLowerCase() !== 'n/a')
   ));
 
-  phoneListEl.innerHTML = filteredPhones.slice(0,200).map(p => `<li>${p}</li>`).join('');
+  phoneListEl.innerHTML = filteredPhones.slice(0,200).map(p => `<li class="opacity-0 animate-fadeIn">${p}</li>`).join('');
   resultsEl.classList.toggle("hidden", filteredPhones.length === 0);
 
+  // Download CSV
   downloadBtn.onclick = () => {
     if (!filteredPhones.length) return;
     const csv = Papa.unparse({ fields: ["phone"], data: filteredPhones.map(p => [p]) });
@@ -118,6 +128,7 @@ function updatePhones() {
     a.remove();
   };
 
+  // Copy results
   copyBtn.onclick = () => {
     const phones = filteredPhones.join("\n");
     if (!phones) return;
