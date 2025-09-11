@@ -1,37 +1,45 @@
-const fileInput = document.getElementById("csvInput");
-const statusEl = document.getElementById("status");
+const csvInput = document.getElementById("csvInput");
 const websiteColSelect = document.getElementById("websiteCol");
 const phoneColSelect = document.getElementById("phoneCol");
 const controls = document.getElementById("controls");
 const results = document.getElementById("results");
 const phoneList = document.getElementById("phoneList");
+const status = document.getElementById("status");
 const downloadBtn = document.getElementById("downloadBtn");
 
-let rows = [];
-let fileName = "";
+let parsedData = [];
+let phonesNoWebsite = [];
 
-fileInput.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
+csvInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
   if (!file) return;
-  statusEl.textContent = "Parsing CSV...";
+
+  status.textContent = `Parsing ${file.name}...`;
+
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
-    complete: (res) => {
-      rows = res.data;
-      if (!rows.length) {
-        statusEl.textContent = "No rows found in the CSV.";
-        return;
-      }
-      const headers = Object.keys(rows[0]);
-      websiteColSelect.innerHTML = `<option value="">(No column — treat all as no website)</option>`;
-      phoneColSelect.innerHTML = `<option value="">Select phone column</option>`;
+    complete: (results) => {
+      parsedData = results.data;
+      status.textContent = `Loaded ${parsedData.length} rows.`;
+
+      // fill selects with headers
+      const headers = results.meta.fields;
+      websiteColSelect.innerHTML = "";
+      phoneColSelect.innerHTML = "";
+
       headers.forEach((h) => {
-        websiteColSelect.innerHTML += `<option value="${h}">${h}</option>`;
-        phoneColSelect.innerHTML += `<option value="${h}">${h}</option>`;
+        const opt1 = document.createElement("option");
+        opt1.value = h;
+        opt1.textContent = h;
+        websiteColSelect.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = h;
+        opt2.textContent = h;
+        phoneColSelect.appendChild(opt2);
       });
-      statusEl.textContent = `File loaded: ${file.name}`;
-      fileName = file.name;
+
       controls.classList.remove("hidden");
     }
   });
@@ -40,30 +48,33 @@ fileInput.addEventListener("change", (e) => {
 downloadBtn.addEventListener("click", () => {
   const websiteCol = websiteColSelect.value;
   const phoneCol = phoneColSelect.value;
-  if (!phoneCol) return alert("Please select a phone column!");
-  const phones = Array.from(new Set(
-    rows
-      .filter((r) => {
-        const w = (r[websiteCol] || "").trim().toLowerCase();
-        return !w || w === "not found" || /^(n\/a|none|not available|-)?$/i.test(w);
-      })
-      .map((r) => (r[phoneCol] || "").trim())
-      .filter((p) => p)
-  ));
-  results.classList.remove("hidden");
-  phoneList.innerHTML = phones.map((p) => `<li>${p}</li>`).join("");
 
-  const csv = Papa.unparse({
-    fields: ["phone"],
-    data: phones.map((p) => [p])
+  if (!phoneCol) {
+    alert("Please select a phone column");
+    return;
+  }
+
+  phonesNoWebsite = parsedData
+    .filter(row => (!row[websiteCol] || row[websiteCol].trim() === ""))
+    .map(row => row[phoneCol])
+    .filter(p => p && p.trim() !== "");
+
+  phoneList.innerHTML = "";
+  phonesNoWebsite.forEach(phone => {
+    const li = document.createElement("li");
+    li.textContent = phone;
+    phoneList.appendChild(li);
   });
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  const base = fileName ? fileName.replace(/\.csv$/i, "") : "phones";
-  a.download = `${base}_no-website_phones.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+
+  results.classList.remove("hidden");
+
+  // download CSV
+  const csvContent = "data:text/csv;charset=utf-8," + phonesNoWebsite.join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "phones_no_website.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 });
