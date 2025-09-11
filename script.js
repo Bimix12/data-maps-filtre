@@ -1,80 +1,59 @@
-const csvInput = document.getElementById("csvInput");
-const websiteColSelect = document.getElementById("websiteCol");
-const phoneColSelect = document.getElementById("phoneCol");
-const controls = document.getElementById("controls");
-const results = document.getElementById("results");
-const phoneList = document.getElementById("phoneList");
-const status = document.getElementById("status");
-const downloadBtn = document.getElementById("downloadBtn");
+document.getElementById("csvInput").addEventListener("change", handleFile);
 
-let parsedData = [];
-let phonesNoWebsite = [];
-
-csvInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
+function handleFile(event) {
+  const file = event.target.files[0];
   if (!file) return;
-
-  status.textContent = `Parsing ${file.name}...`;
 
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
     complete: (results) => {
-      parsedData = results.data;
-      status.textContent = `Loaded ${parsedData.length} rows.`;
-
-      // fill selects with headers
+      const rows = results.data;
       const headers = results.meta.fields;
-      websiteColSelect.innerHTML = "";
-      phoneColSelect.innerHTML = "";
 
-      headers.forEach((h) => {
-        const opt1 = document.createElement("option");
-        opt1.value = h;
-        opt1.textContent = h;
-        websiteColSelect.appendChild(opt1);
+      const websiteCol = document.getElementById("websiteCol");
+      const phoneCol = document.getElementById("phoneCol");
 
-        const opt2 = document.createElement("option");
-        opt2.value = h;
-        opt2.textContent = h;
-        phoneColSelect.appendChild(opt2);
+      websiteCol.innerHTML = `<option value="">(No column)</option>`;
+      phoneCol.innerHTML = `<option value="">Select column</option>`;
+
+      headers.forEach(h => {
+        websiteCol.innerHTML += `<option value="${h}">${h}</option>`;
+        phoneCol.innerHTML += `<option value="${h}">${h}</option>`;
       });
 
-      controls.classList.remove("hidden");
+      document.getElementById("controls").classList.remove("hidden");
+
+      document.getElementById("downloadBtn").onclick = () => {
+        const wCol = websiteCol.value;
+        const pCol = phoneCol.value;
+
+        const phones = rows
+          .filter(r => !r[wCol] || r[wCol].trim() === "")
+          .map(r => r[pCol])
+          .filter(p => p);
+
+        const uniquePhones = [...new Set(phones)];
+
+        const list = document.getElementById("phoneList");
+        list.innerHTML = "";
+        uniquePhones.forEach(p => {
+          const li = document.createElement("li");
+          li.textContent = p;
+          list.appendChild(li);
+        });
+
+        document.getElementById("results").classList.remove("hidden");
+
+        // download CSV
+        const csv = Papa.unparse({ fields: ["phone"], data: uniquePhones.map(p => [p]) });
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "phones_no_website.csv";
+        a.click();
+      };
     }
   });
-});
-
-downloadBtn.addEventListener("click", () => {
-  const websiteCol = websiteColSelect.value;
-  const phoneCol = phoneColSelect.value;
-
-  if (!phoneCol) {
-    alert("Please select a phone column");
-    return;
-  }
-
-  phonesNoWebsite = parsedData
-    .filter(row => (!row[websiteCol] || row[websiteCol].trim() === ""))
-    .map(row => row[phoneCol])
-    .filter(p => p && p.trim() !== "");
-
-  phoneList.innerHTML = "";
-  phonesNoWebsite.forEach(phone => {
-    const li = document.createElement("li");
-    li.textContent = phone;
-    phoneList.appendChild(li);
-  });
-
-  results.classList.remove("hidden");
-
-  // download CSV
-  const csvContent = "data:text/csv;charset=utf-8," + phonesNoWebsite.join("\n");
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "phones_no_website.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-});
+}
