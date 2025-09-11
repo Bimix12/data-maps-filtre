@@ -1,100 +1,13 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f9fafb;
-  color: #111827;
-  margin: 0;
-  padding: 0;
+/* Optional custom tweaks */
+body::-webkit-scrollbar {
+  width: 8px;
 }
 
-.container {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.5);
+  border-radius: 4px;
 }
 
-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+body::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.05);
 }
-
-header p {
-  color: #6b7280;
-  margin-bottom: 1.5rem;
-}
-
-.upload-section, .data-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  margin-bottom: 20px;
-}
-
-.upload-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #e5e7eb;
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-#csvInput {
-  display: none;
-}
-
-.drop-area {
-  margin-top: 10px;
-  border: 2px dashed #d1d5db;
-  padding: 40px;
-  text-align: center;
-  border-radius: 16px;
-  color: #6b7280;
-}
-
-.loading { color: #6b7280; margin-top: 10px; }
-.error { color: #dc2626; margin-top: 10px; }
-
-.file-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
-
-.selectors {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 12px;
-}
-
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
-
-.phone-list {
-  max-height: 300px;
-  overflow-y: auto;
-  padding-left: 20px;
-}
-
-.hidden { display: none; }
-
-button {
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 12px;
-  border: none;
-  background: #111827;
-  color: #fff;
-}
-
-button:hover { opacity: 0.9; }
